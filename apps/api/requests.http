@@ -1,0 +1,66 @@
+# Open this file in VS Code with the "REST Client" extension (humao.rest-client).
+# Click "Send Request" above each block, top to bottom.
+
+@baseUrl = http://localhost:5080
+
+### 1. Log in (seeded admin from appsettings.Development.json)
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{ "email": "admin@example.com", "password": "ChangeMe123!" }
+
+###
+@token = {{login.response.body.$.token}}
+
+### 2. Create a project (comes with development + production environments)
+POST {{baseUrl}}/api/projects
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "key": "demo-shop", "name": "Demo Shop" }
+
+### 3. Create a boolean flag
+POST {{baseUrl}}/api/projects/demo-shop/flags
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "key": "new-checkout", "name": "New checkout", "description": "Redesigned checkout flow", "kind": "Boolean" }
+
+### 4. Read it back (copy the variation ids and each environment's version from the response)
+GET {{baseUrl}}/api/projects/demo-shop/flags/new-checkout
+Authorization: Bearer {{token}}
+
+### 5. Turn it on in development. Replace the GUIDs and expectedVersion with values from step 4.
+PUT {{baseUrl}}/api/projects/demo-shop/flags/new-checkout/environments/development
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "enabled": true,
+  "offVariationId": "REPLACE-WITH-FALSE-VARIATION-ID",
+  "fallthrough": { "rollout": [
+    { "variationId": "REPLACE-WITH-TRUE-VARIATION-ID",  "weight": 2000 },
+    { "variationId": "REPLACE-WITH-FALSE-VARIATION-ID", "weight": 8000 }
+  ] },
+  "rules": [
+    {
+      "description": "Premium users",
+      "clauses": [ { "attribute": "plan", "op": "eq", "values": ["premium"] } ],
+      "serve": { "variationId": "REPLACE-WITH-TRUE-VARIATION-ID" }
+    }
+  ],
+  "expectedVersion": 1
+}
+
+### 6. Send step 5 again unchanged: expectedVersion is now stale, so you should get 409
+### 7. Audit log for the project
+GET {{baseUrl}}/api/projects/demo-shop/audit?limit=20
+Authorization: Bearer {{token}}
+
+### 8. Create a server SDK key for production (the plaintext key is shown only once)
+POST {{baseUrl}}/api/projects/demo-shop/environments/production/sdk-keys
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{ "type": "Server" }

@@ -1,0 +1,16 @@
+# .NET
+bin/
+obj/
+*.user
+.vs/
+
+# Node
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+
+# OS / editors
+.DS_Store
+.idea/
