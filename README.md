@@ -1,7 +1,12 @@
-# FlagForge
+# FlagForge(Phase 1 Development)
 
 Feature flag and A/B testing platform: admin dashboard, low-latency evaluation API,
 TypeScript SDK, audit log, and a demo shop.
+
+The platform is currently in the first phase of development which involves:
+- Seting up a monorepo with apps/api, apps/dashboard, apps/demo-shop, packages/sdk, and docs/.
+- Writing the data model: Project, Environment, Flag, Variation, Rule, Segment, SdkKey, AuditEntry, Experiment, Event.
+- Definition the API contract in OpenAPI and set up CI from day one.
 
 ## Layout
 
